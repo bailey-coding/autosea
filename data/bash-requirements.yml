@@ -1,0 +1,10 @@
+requirements:
+  - jq
+  - curl
+  - host
+  - base64
+  - sha256sum
+  - sha512sum
+  - sed
+  - awk
+  - python3
