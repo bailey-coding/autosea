@@ -7,7 +7,6 @@ source ./modules-bash/basics.sh || { echo "Error sourcing .core tools, exiting."
 
 # install base reqs
 install_requirements=false
-prep_analytics=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
