@@ -97,7 +97,6 @@ for i; do
     python3 ./modules-python/virustotal.py "${deobscufator_url}" "$VTAPI_KEY"
     echo "=================="
     echo ""
-    python3 ./modules-python/analytics/analytics-submit.py "${deobscufator_url}"
 done
 
 
