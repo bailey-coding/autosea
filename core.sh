@@ -15,10 +15,6 @@ while [[ $# -gt 0 ]]; do
             install_requirements=true
             shift
             ;;
-        --prep-analytics)
-            prep_analytics=true
-            shift
-            ;;
         *)
             break
             ;;
@@ -44,12 +40,6 @@ if [ "$install_requirements" = true ]; then
         echo "Unsupported package manager or not found"
         exit 1
     fi
-    exit 0
-fi
-
-if [ "$prep_analytics" = true ]; then 
-    echo "Preparing cloudwatch analytics environment in AWS"
-    python3 ./modules-python/analytics/analytics-setup.py
     exit 0
 fi
 
