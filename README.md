@@ -1,14 +1,15 @@
 # AutoSea:
-The AWS Architecture is like a giant body of water, everything connected in ways we might not always *sea*.
-This tool (AutoSea) allows AWS Trust & Safety Associates to get a rough but very quick output of everything related to an input domain and what might show up related to it. 
+The Internet is like a giant body of water, everything connected in ways we might not always *sea*.
+This tool (AutoSea) allows Trust & Safety teams as well as Abuse Researchers to get a rough but very quick output of everything related to an input domain and what might show up related to it. 
 
 ## Installation:
 clone repo, copy ./data/.env.example to ./data/.env and add your own virustotal API key, as found here. https://support.virustotal.com/hc/en-us/articles/115002100149-API
+If you're on macOS, ensure you have brew, Python3, and Pip installed, and then run `python3 -m pip install -r /path/to/repository/data/python-requirements.txt --break-system-packages`
+If you're on linux, the tool *should* successfully install all requirements.  You can run the install phase with the following: `/path/to/repository/core.sh --install-requirements`
 
 
 ## Releases:
-The most current release can be found Here (Here doesn't exist yet, as of 2024-01-26), still WIP.
-
+The most current release can be found on my Github, https://github.com/wafflethief123/autosea
 ## Exit Codes
 | Exit Code | Purpose |
 |---|---|
