@@ -58,7 +58,7 @@ def curl_headers(url):
 
 
 def host_lookup(url):
-    domain_regex = r'^(?:http[s]?://)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})'
+    domain_regex = r'^(?:http[s]?://)?(?:[a-zA-Z0-9-]+\.)+([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?:[/?].*)?$'
     match = re.match(domain_regex, url)
     if match:
         domain = match.group(1)
@@ -72,7 +72,7 @@ def host_lookup(url):
         except subprocess.CalledProcessError:
             # Catch the exception and instead of printing the error, we exit with a custom message
             print("Host lookup failed: no DNS records found.")
-            sys.exit(1)  # Using exit code 1 to indicate an error, but this can be adjusted based on your needs
+            sys.exit(1)  # Using exit code 1 to indicate an error, see readme for all exit codes in use.
     else:
         print("Invalid domain format.")
 
