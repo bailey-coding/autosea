@@ -3,11 +3,11 @@
 # Pulls the current fabulizer IP list from S3
 #    Note: The fabulizer javascript is full of easter eggs, you should check it out sometime.
 __UpdateAWSIpList__ () {
-    local AWS_IP_LIST_URL="https://project-fabulizer.s3.amazonaws.com/ip-ranges.json"
+    local AWS_IP_LIST_URL="https://ip-ranges.amazonaws.com/ip-ranges.json"
     local AWS_IP_LIST_TEMP_PATH="./data/aws-ip-ranges-temp.json"
     local AWS_IP_LIST_PATH="./data/aws-ip-ranges.json"
     if ! curl -s --fail "${AWS_IP_LIST_URL}" -o "${AWS_IP_LIST_TEMP_PATH}"; then
-        echo "Error: Failed to download AWS IP ranges. Are you on the VPN?"
+        echo "Error: Failed to download AWS IP ranges.
         exit 1
     fi
     jq '.' "${AWS_IP_LIST_TEMP_PATH}" > ${AWS_IP_LIST_PATH}
