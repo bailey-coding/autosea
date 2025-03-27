@@ -7,7 +7,7 @@ __UpdateAWSIpList__ () {
     local AWS_IP_LIST_TEMP_PATH="./data/aws-ip-ranges-temp.json"
     local AWS_IP_LIST_PATH="./data/aws-ip-ranges.json"
     if ! curl -s --fail "${AWS_IP_LIST_URL}" -o "${AWS_IP_LIST_TEMP_PATH}"; then
-        echo "Error: Failed to download AWS IP ranges.
+        echo "Error: Failed to download AWS IP ranges."
         exit 1
     fi
     jq '.' "${AWS_IP_LIST_TEMP_PATH}" > ${AWS_IP_LIST_PATH}
@@ -18,5 +18,4 @@ __UpdateAWSIpList__ () {
 __UpdateCloudflareIpList__ () {
     curl -s -H 'Authorization: Bearer undefined' -H 'Content-Type: application/json' https://api.cloudflare.com/client/v4/ips | jq '.' > ./data/cloudflare-ip-ranges.json
 }
-
 
