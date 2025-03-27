@@ -15,7 +15,7 @@ __UpdateAWSIpList__ () {
    rm ${AWS_IP_LIST_TEMP_PATH}
 }
 
-# query the cloudflare API, download a copy of their current IP ranges. no api auth keys are needed for this.
+# query the cloudflare API, download a copy of their current IP ranges. no api auth keys are needed for this.  Man I hate the JQ hack I need to perform on it but hey if it works it works? -shrug-
 __UpdateCloudflareIpList__ () {
     curl -s -H 'Authorization: Bearer undefined' -H 'Content-Type: application/json' https://api.cloudflare.com/client/v4/ips | jq '.' > ./data/cloudflare-ip-ranges.json
 }
