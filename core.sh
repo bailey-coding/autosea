@@ -14,20 +14,8 @@ while [[ $# -gt 0 ]]; do
             install_requirements=true
             shift
             ;;        
-        --android-user-agent)
-            user_agent_setting=android
-            shift
-            ;;
-        --ios-user-agent)
-            user_agent_setting=ios
-            shift
-            ;;
-        --windows-user-agent)
-            user_agent_setting=windows
-            shift
-            ;;
-        --mac-user-agent)
-            user_agent_setting=macos
+        --user-agent)
+            python3 python-modules/user_agent_config.py
             shift
             ;;
         *)
