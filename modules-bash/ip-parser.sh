@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-# Pulls the current fabulizer IP list from S3
-#    Note: The fabulizer javascript is full of easter eggs, you should check it out sometime.
+# Pulls the IP list from Amazon's public page, docs on this are here: https://docs.aws.amazon.com/vpc/latest/userguide/aws-ip-ranges.html#aws-ip-download 
+# I wonder if this differs from the internal AWS T&S tool's list. 
+
 __UpdateAWSIpList__ () {
     local AWS_IP_LIST_URL="https://ip-ranges.amazonaws.com/ip-ranges.json"
     local AWS_IP_LIST_TEMP_PATH="./data/aws-ip-ranges-temp.json"
