@@ -3,3 +3,4 @@ ipaddress
 validators
 boto3
 python-dotenv
+textual
