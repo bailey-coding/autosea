@@ -13,6 +13,22 @@ while [[ $# -gt 0 ]]; do
         --install-requirements)
             install_requirements=true
             shift
+            ;;        
+        --android-user-agent)
+            user_agent_setting=android
+            shift
+            ;;
+        --ios-user-agent)
+            user_agent_setting=ios
+            shift
+            ;;
+        --windows-user-agent)
+            user_agent_setting=windows
+            shift
+            ;;
+        --mac-user-agent)
+            user_agent_setting=macos
+            shift
             ;;
         *)
             break
