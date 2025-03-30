@@ -1,5 +1,6 @@
-from pathlib import Path
 import json
+import sys
+from pathlib import Path
 from pydantic import BaseModel
 from typing import Optional
 from textual.app import App, ComposeResult
@@ -24,13 +25,12 @@ class OperatingSystemsModel(BaseModel):
     iOS: Optional[OperatingSystemUserAgentsModel] = None
     Android: Optional[OperatingSystemUserAgentsModel] = None
 
-# Load user agent data safely
 try:
     with USERAGENT_OPTIONS_PATH.open("r") as f:
         useragent_data = json.load(f)
 except FileNotFoundError:
     print(f"[ERROR] File not found: {USERAGENT_OPTIONS_PATH}")
-    exit(1)
+    sys.exit(1)
 
 OS_UserAgent_Model = OperatingSystemsModel(**useragent_data)
 OS_DICT = OS_UserAgent_Model.model_dump()
@@ -44,7 +44,7 @@ def generate_export_line(agent: str) -> str:
 
 def tui():
     class UserAgentApp(App):
-
+                
         def compose(self) -> ComposeResult:
             self.platform = None
             self.browser = None
@@ -113,14 +113,14 @@ def tui():
 
         @on(Button.Pressed, "#cancel")
         def cancel_pressed(self) -> None:
-            print("[ACTION] Cancelled by user. Exiting.")
-            self.exit()
+            print("[ACTION] Cancelled by user.")
+            self.exit(1)  # Exit with code 1 for cancellation
 
         @on(Button.Pressed, "#confirm")
         def confirm_pressed(self) -> None:
             if not (self.platform and self.browser):
                 print("[ERROR] Incomplete selection.")
-                return
+                self.exit(1)
 
             platform_data = OS_DICT.get(self.platform)
             agent = platform_data.get(self.browser) if platform_data else None
@@ -130,12 +130,14 @@ def tui():
                 print(f"[WRITING] {agent}")
                 set_user_agent(agent)
                 print(generate_export_line(agent))
-                self.exit()
+                self.exit(0)  # Exit with code 0 for success
             else:
                 print(f"[ERROR] No agent for {self.platform}/{self.browser}")
                 self.exit(1)
 
-    UserAgentApp().run()
+    app = UserAgentApp()
+    exit_code = app.run()
+    sys.exit(exit_code)
 
 if __name__ == "__main__":
     tui()
