@@ -1,5 +1,8 @@
 from pathlib import Path
 import os
+from textual.app import App, ComposeResult
+from textual.widgets import Static, Select
+from textual.containers import Vertical
 
 CONFIG_PATH = Path("data/user_agent.conf")
 
@@ -39,9 +42,6 @@ def generate_export_line(agent: str) -> str:
     return f'export user_agent="{agent}"'
 
 def tui():
-    from textual.app import App, ComposeResult
-    from textual.widgets import Static, Select
-    from textual.containers import Vertical
 
     class UserAgentApp(App):
         CSS = """
