@@ -15,7 +15,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;        
         --user-agent)
-            python3 python-modules/user_agent_config.py
+            python3 modules-python/user_agent_config.py
             shift
             ;;
         *)
