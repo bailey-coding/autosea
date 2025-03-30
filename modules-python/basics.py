@@ -19,8 +19,6 @@ def url_formatter(url):
         print("Example: https://example.com/")
         sys.exit(2)
 
-import re
-
 def curl_headers(url):
     try:
         response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0'}, allow_redirects=True)
