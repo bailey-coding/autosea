@@ -4,6 +4,16 @@ import base64
 import hashlib
 import requests
 import subprocess
+from dotenv import dotenv_values
+from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+ENV_PATH = SCRIPT_DIR.parent / "data" / ".env"
+env_vars = dotenv_values(ENV_PATH)
+
+DEFAULT_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0'
+USER_AGENT = env_vars.get("CUSTOM_USER_AGENT", DEFAULT_USER_AGENT)
+
 
 def url_formatter(url):
     # Validate URL format
@@ -19,21 +29,23 @@ def url_formatter(url):
         print("Example: https://example.com/")
         sys.exit(2)
 
-import re
-
 def curl_headers(url):
     try:
-        response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0'}, allow_redirects=True)
+        response = requests.get(url, headers={'User-Agent': USER_AGENT}, allow_redirects=True)
+        
         if response.history:
             print("Redirect path:")
             for redirect in response.history:
-                print(f"  Redirected from: {redirect.url} to {redirect.headers['Location']}")
+                location = redirect.headers.get('Location', 'Unknown')
+                print(f"  Redirected from: {redirect.url} to {location}")
             print(f"  Final URL: {response.url}")
+
         print("response:")
         print(f"  status code: {response.status_code}")
         for header in ['Date', 'Content-Type', 'Server', 'Location', 'Via']:
             if header in response.headers:
                 print(f"  {header.lower()}: {response.headers[header]}")
+
     except requests.RequestException as e:
         error_message = str(e)
         # Match SSL Certificate Verification Errors
@@ -55,7 +67,6 @@ def curl_headers(url):
         
         print(f"curl failed: {error_summary}")
         sys.exit(1)
-
 
 def host_lookup(url):
     domain_regex = r'^(?:http[s]?://)?(?:[a-zA-Z0-9-]+\.)+([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?:[/?].*)?$'
