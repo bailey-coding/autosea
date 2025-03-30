@@ -17,10 +17,6 @@ __UrlFormatter__ () {
     fi
 }
 
-# user agent creator
-
-__SetUserAgent__
-
 
 # required software parser, ensuring reqs are all present on the system.
 __CheckInstalledSoftware__() {
