@@ -1,38 +1,31 @@
 from pathlib import Path
-import os
+import json
+from pydantic import BaseModel
+from typing import Optional
 from textual.app import App, ComposeResult
-from textual.widgets import Static, Select
-from textual.containers import Vertical
+from textual.widgets import Static, Select, Button
+from textual.containers import Vertical, Horizontal
+from textual import on
 
-CONFIG_PATH = Path("data/user_agent.conf")
+class OperatingSystemUserAgentsModel(BaseModel):
+    Chrome: Optional[str] = None
+    Firefox: Optional[str] = None
+    Edge: Optional[str] = None
+    Safari: Optional[str] = None
 
-UA_MAP = {
-    "PC": {
-        "Chrome": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
-        "Firefox": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0",
-        "Edge": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.3124.95"
-    },
-    "Mac": {
-        "Safari": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_7_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15",
-        "Chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_7_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
-        "Firefox": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14.7; rv:136.0) Gecko/20100101 Firefox/136.0",
-    },
-    "iOS": {
-        "Safari": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_7_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Mobile/15E148 Safari/604.1",
-        "Chrome": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_7_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/135.0.7049.35 Mobile/15E148 Safari/604.1",
-        "Firefox": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_7_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/136.0 Mobile/15E148 Safari/605.1.15"
-    },
-    "Android": {
-        "Chrome": "Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.6998.135 Mobile Safari/537.36",
-        "Firefox": "Mozilla/5.0 (Android 15; Mobile; rv:68.0) Gecko/68.0 Firefox/136.0",
-    },
-}
+class OperatingSystemsModel(BaseModel):
+    PC: Optional[OperatingSystemUserAgentsModel] = None
+    Mac: Optional[OperatingSystemUserAgentsModel] = None
+    iOS: Optional[OperatingSystemUserAgentsModel] = None
+    Android: Optional[OperatingSystemUserAgentsModel] = None
 
-def get_user_agent() -> str:
-    try:
-        return CONFIG_PATH.read_text().strip()
-    except FileNotFoundError:
-        return ""
+
+with open("../data/useragent_options.json", "r") as f:
+    useragent_data = json.load(f)
+
+OS_UserAgent_Model = OperatingSystemsModel(**useragent_data)
+OS_DICT = OS_UserAgent_Model.model_dump()
+CONFIG_PATH = Path("../data/user-agent.conf")
 
 def set_user_agent(agent: str):
     CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -42,39 +35,97 @@ def generate_export_line(agent: str) -> str:
     return f'export user_agent="{agent}"'
 
 def tui():
-
     class UserAgentApp(App):
-        CSS = """
-        Screen {
-            align: center middle;
-        }
-        """
 
         def compose(self) -> ComposeResult:
-            yield Vertical(
-                Static("Choose your platform:"),
-                Select([(k, k) for k in UA_MAP.keys()], id="platform"),
-                Static("Choose your browser:"),
-                Select([], id="browser"),
+            self.platform = None
+            self.browser = None
+
+            platforms = [(os, os) for os in OS_DICT.keys()]
+            self.platform_select = Select(options=platforms, id="platform")
+            self.browser_static = Static("Choose your browser:")
+            self.browser_select = Select(options=[])
+
+            self.button_row = Horizontal(
+                Button("Cancel", id="cancel", variant="error"),
+                Button("Okay", id="confirm", disabled=True, variant="success"),
             )
 
+            self.input_container = Vertical(
+                Static("Choose your platform:"),
+                self.platform_select,
+                self.browser_static,
+                self.browser_select,
+            )
+
+            self.layout = Vertical(
+                self.input_container,
+                self.button_row,
+                id="dialog",
+            )
+
+            yield self.layout
+
         def on_mount(self) -> None:
-            self.query_one("#platform", Select).focus()
+            self.platform_select.focus()
 
-        def on_select_changed(self, event: Select.Changed) -> None:
-            if event.select.id == "platform":
-                browser_select = self.query_one("#browser", Select)
-                browser_select.options = [(b, b) for b in UA_MAP[event.value].keys()]
-                browser_select.value = None
+        def validate_ready(self):
+            confirm_button = self.query_one("#confirm", Button)
+            confirm_button.disabled = not (self.platform and self.browser)
 
-            elif event.select.id == "browser":
-                platform = self.query_one("#platform", Select).value
-                browser = event.value
-                if platform and browser:
-                    agent = UA_MAP[platform][browser]
-                    set_user_agent(agent)
-                    print(generate_export_line(agent))
-                    self.exit()
+        @on(Select.Changed, "#platform")
+        def platform_selected(self, event: Select.Changed) -> None:
+            self.platform = event.value
+            self.browser = None
+            self.validate_ready()
+
+            platform_data = OS_DICT.get(self.platform)
+            if not platform_data:
+                print(f"[ERROR] No platform data for {self.platform}")
+                return
+
+            browser_options = [
+                (browser, browser)
+                for browser, agent in platform_data.items()
+                if agent
+            ]
+
+            if self.browser_select.parent:
+                self.browser_select.remove()
+
+            self.browser_select = Select(options=browser_options)
+            self.input_container.mount(self.browser_select, after=self.browser_static)
+            self.browser_select.focus()
+
+        @on(Select.Changed)
+        def browser_selected(self, event: Select.Changed) -> None:
+            if event.select is self.browser_select:
+                self.browser = event.value
+                self.validate_ready()
+
+        @on(Button.Pressed, "#cancel")
+        def cancel_pressed(self) -> None:
+            print("[ACTION] Cancelled by user. Exiting.")
+            self.exit()
+
+        @on(Button.Pressed, "#confirm")
+        def confirm_pressed(self) -> None:
+            if not (self.platform and self.browser):
+                print("[ERROR] Incomplete selection.")
+                return
+
+            platform_data = OS_DICT.get(self.platform)
+            agent = platform_data.get(self.browser) if platform_data else None
+
+            if agent:
+                print(f"[SUCCESS] Selected: {self.platform}/{self.browser}")
+                print(f"[WRITING] {agent}")
+                set_user_agent(agent)
+                print(generate_export_line(agent))
+                self.exit()
+            else:
+                print(f"[ERROR] No agent for {self.platform}/{self.browser}")
+                self.exit(1)
 
     UserAgentApp().run()
 
