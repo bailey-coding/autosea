@@ -49,17 +49,27 @@ fi
 
 
 if [[ "${config_user_agent:-false}" == "true" ]]; then
-
     if [[ -n "${CUSTOM_USER_AGENT:-}" ]]; then
         echo "CUSTOM_USER_AGENT is already set in ./data/.env"
         exit 3
     else
         python3 ./modules-python/user_agent_config.py
-        echo "Your User Agent has been set to:"
-        cat ./data/user-agent.conf
-        exit 0
+        exit_code=$?
+
+        if [ $exit_code -eq 0 ]; then
+            echo "Your User Agent has been set to:"
+            cat ./data/user-agent.conf
+            exit 0
+        elif [ $exit_code -eq 1 ]; then
+            echo "You've cancelled setting the user agent. Exiting."
+            exit 1
+        else
+            echo "Unknown error occurred in user_agent_config.py"
+            exit $exit_code
+        fi
     fi
 fi
+
 
 if [ ! -f "${BASH_REQUIREMENTS_YAML}" ]; then
     echo "Error: YAML file '${BASH_REQUIREMENTS_YAML}' not found."
