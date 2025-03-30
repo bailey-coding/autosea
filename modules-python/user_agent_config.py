@@ -7,6 +7,11 @@ from textual.widgets import Static, Select, Button
 from textual.containers import Vertical, Horizontal
 from textual import on
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+DATA_DIR = SCRIPT_DIR.parent / "data"
+USERAGENT_OPTIONS_PATH = DATA_DIR / "useragent_options.json"
+CONFIG_PATH = DATA_DIR / "user-agent.conf"
+
 class OperatingSystemUserAgentsModel(BaseModel):
     Chrome: Optional[str] = None
     Firefox: Optional[str] = None
@@ -19,13 +24,16 @@ class OperatingSystemsModel(BaseModel):
     iOS: Optional[OperatingSystemUserAgentsModel] = None
     Android: Optional[OperatingSystemUserAgentsModel] = None
 
-
-with open("../data/useragent_options.json", "r") as f:
-    useragent_data = json.load(f)
+# Load user agent data safely
+try:
+    with USERAGENT_OPTIONS_PATH.open("r") as f:
+        useragent_data = json.load(f)
+except FileNotFoundError:
+    print(f"[ERROR] File not found: {USERAGENT_OPTIONS_PATH}")
+    exit(1)
 
 OS_UserAgent_Model = OperatingSystemsModel(**useragent_data)
 OS_DICT = OS_UserAgent_Model.model_dump()
-CONFIG_PATH = Path("../data/user-agent.conf")
 
 def set_user_agent(agent: str):
     CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
