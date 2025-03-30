@@ -86,7 +86,7 @@ for i; do
     exit_code=$?
 
     if [ $exit_code -ne 0 ]; then
-        echo "Error deobfuscating URL: ${i}, please use Abuse Case Cleaner."
+        echo "Error deobfuscating URL: ${i}, please deobscufate manually."
         exit $exit_code
     fi
 
