@@ -1,6 +1,5 @@
 .env
 /data/.env
-/data/user-agent.conf
 aws-ip-ranges.json
 aws-ip-ranges-temp.json
 cloudflare-ip-ranges.json
