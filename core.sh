@@ -15,7 +15,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;        
         --user-agent)
-            python3 modules-python/user_agent_config.py
+            config_user_agent=true
             shift
             ;;
         *)
@@ -47,6 +47,19 @@ if [ "$install_requirements" = true ]; then
     exit 0
 fi
 
+
+if [[ "${config_user_agent:-false}" == "true" ]]; then
+
+    if [[ -n "${CUSTOM_USER_AGENT:-}" ]]; then
+        echo "CUSTOM_USER_AGENT is already set in ./data/.env"
+        exit 3
+    else
+        python3 ./modules-python/user_agent_config.py
+        echo "Your User Agent has been set to:"
+        cat ./data/user-agent.conf
+        exit 0
+    fi
+fi
 
 if [ ! -f "${BASH_REQUIREMENTS_YAML}" ]; then
     echo "Error: YAML file '${BASH_REQUIREMENTS_YAML}' not found."
