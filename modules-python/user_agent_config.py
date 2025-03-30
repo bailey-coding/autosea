@@ -1,5 +1,6 @@
 import json
 import sys
+from dotenv import dotenv_values, set_key
 from pathlib import Path
 from pydantic import BaseModel
 from typing import Optional
@@ -8,10 +9,11 @@ from textual.widgets import Static, Select, Button
 from textual.containers import Vertical, Horizontal
 from textual import on
 
+# Paths
 SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_DIR = SCRIPT_DIR.parent / "data"
 USERAGENT_OPTIONS_PATH = DATA_DIR / "useragent_options.json"
-CONFIG_PATH = DATA_DIR / "user-agent.conf"
+ENV_FILE_PATH = DATA_DIR / ".env"
 
 class OperatingSystemUserAgentsModel(BaseModel):
     Chrome: Optional[str] = None
@@ -25,30 +27,21 @@ class OperatingSystemsModel(BaseModel):
     iOS: Optional[OperatingSystemUserAgentsModel] = None
     Android: Optional[OperatingSystemUserAgentsModel] = None
 
-try:
-    with USERAGENT_OPTIONS_PATH.open("r") as f:
-        useragent_data = json.load(f)
-except FileNotFoundError:
-    print(f"[ERROR] File not found: {USERAGENT_OPTIONS_PATH}")
-    sys.exit(1)
+with USERAGENT_OPTIONS_PATH.open("r") as f:
+    useragent_data = json.load(f)
 
 OS_UserAgent_Model = OperatingSystemsModel(**useragent_data)
 OS_DICT = OS_UserAgent_Model.model_dump()
 
-def set_user_agent(agent: str):
-    CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    CONFIG_PATH.write_text(agent.strip())
-
-def generate_export_line(agent: str) -> str:
-    return f'export user_agent="{agent}"'
+def set_user_agent_in_env(agent: str):
+    env_config = dotenv_values(ENV_FILE_PATH)
+    set_key(str(ENV_FILE_PATH), "CUSTOM_USER_AGENT", agent.strip())
 
 def tui():
     class UserAgentApp(App):
-                
         def compose(self) -> ComposeResult:
             self.platform = None
             self.browser = None
-
             platforms = [(os, os) for os in OS_DICT.keys()]
             self.platform_select = Select(options=platforms, id="platform")
             self.browser_static = Static("Choose your browser:")
@@ -86,17 +79,8 @@ def tui():
             self.platform = event.value
             self.browser = None
             self.validate_ready()
-
             platform_data = OS_DICT.get(self.platform)
-            if not platform_data:
-                print(f"[ERROR] No platform data for {self.platform}")
-                return
-
-            browser_options = [
-                (browser, browser)
-                for browser, agent in platform_data.items()
-                if agent
-            ]
+            browser_options = [(browser, browser) for browser, agent in platform_data.items() if agent]
 
             if self.browser_select.parent:
                 self.browser_select.remove()
@@ -114,7 +98,7 @@ def tui():
         @on(Button.Pressed, "#cancel")
         def cancel_pressed(self) -> None:
             print("[ACTION] Cancelled by user.")
-            self.exit(1)  # Exit with code 1 for cancellation
+            self.exit(1)
 
         @on(Button.Pressed, "#confirm")
         def confirm_pressed(self) -> None:
@@ -127,17 +111,14 @@ def tui():
 
             if agent:
                 print(f"[SUCCESS] Selected: {self.platform}/{self.browser}")
-                print(f"[WRITING] {agent}")
-                set_user_agent(agent)
-                print(generate_export_line(agent))
-                self.exit(0)  # Exit with code 0 for success
+                print(f"[WRITING TO .env] CUSTOM_USER_AGENT={agent}")
+                set_user_agent_in_env(agent)
+                self.exit(0)
             else:
                 print(f"[ERROR] No agent for {self.platform}/{self.browser}")
                 self.exit(1)
 
-    app = UserAgentApp()
-    exit_code = app.run()
-    sys.exit(exit_code)
+    sys.exit(UserAgentApp().run())
 
 if __name__ == "__main__":
     tui()
