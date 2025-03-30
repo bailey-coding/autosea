@@ -1,0 +1,9 @@
+services:
+  autosea-runner:
+    build: .
+    environment:
+      - TARGET_URL=https://foo.xyz
+    entrypoint: ["/bin/bash", "-c", "./core.sh \"$TARGET_URL\""]
+    volumes:
+      - .:/app
+    working_dir: /app
