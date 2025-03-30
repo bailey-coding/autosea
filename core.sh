@@ -27,17 +27,18 @@ done
 if [ "$install_requirements" = true ]; then
     if command -v dnf &>/dev/null; then
         echo "Using DNF package manager"
-        sudo dnf install -y python3 python3-pip
+        dnf install -y python3 python3-pip
         python3 -m pip install -r ./data/python-requrements.txt -qqq
     elif command -v yum &>/dev/null; then
         echo "Using Yum package manager"
-        sudo yum install -y python3 python3-pip
+        yum install -y python3 python3-pip
         python3 -m pip install -r ./data/python-requrements.txt -qqq
     elif command -v apt &>/dev/null; then
         # Use apt on Debian based systems (Ubuntu, Debian)
+        # yes i call apt-get here for backwards compatability. if you have an issue with it, fork it. 
         echo "Using APT package manager"
-        sudo apt-get update
-        sudo apt-get install -y python3 python3-pip
+        apt-get update
+        apt-get install -y python3 python3-pip
         python3 -m pip install -r ./data/python-requrements.txt -qqq
     else
         echo "Unsupported package manager or not found"
