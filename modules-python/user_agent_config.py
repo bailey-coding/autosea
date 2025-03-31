@@ -1,6 +1,6 @@
 import json
 import sys
-from dotenv import dotenv_values, set_key
+from dotenv import set_key
 from pathlib import Path
 from pydantic import BaseModel
 from typing import Optional
@@ -15,11 +15,13 @@ DATA_DIR = SCRIPT_DIR.parent / "data"
 USERAGENT_OPTIONS_PATH = DATA_DIR / "useragent_options.json"
 ENV_FILE_PATH = DATA_DIR / ".env"
 
+
 class OperatingSystemUserAgentsModel(BaseModel):
     Chrome: Optional[str] = None
     Firefox: Optional[str] = None
     Edge: Optional[str] = None
     Safari: Optional[str] = None
+
 
 class OperatingSystemsModel(BaseModel):
     PC: Optional[OperatingSystemUserAgentsModel] = None
@@ -27,15 +29,18 @@ class OperatingSystemsModel(BaseModel):
     iOS: Optional[OperatingSystemUserAgentsModel] = None
     Android: Optional[OperatingSystemUserAgentsModel] = None
 
+
 with USERAGENT_OPTIONS_PATH.open("r") as f:
     useragent_data = json.load(f)
 
 OS_UserAgent_Model = OperatingSystemsModel(**useragent_data)
 OS_DICT = OS_UserAgent_Model.model_dump()
 
+
 def set_user_agent_in_env(agent: str):
-    env_config = dotenv_values(ENV_FILE_PATH)
+    # env_config = dotenv_values(ENV_FILE_PATH)
     set_key(str(ENV_FILE_PATH), "CUSTOM_USER_AGENT", agent.strip())
+
 
 def tui():
     class UserAgentApp(App):

@@ -17,8 +17,8 @@ def url_formatter(url):
     # Validate URL format
     pattern = r"^(http|https)://[a-zA-Z0-9.-]+[a-zA-Z0-9]\.[a-zA-Z]{2,}.*$"
     if re.match(pattern, url):
-        url_base64 = base64.b64encode(url.encode()).decode().rstrip('=')
-        url_sha256 = hashlib.sha256(url.encode()).hexdigest()
+        # url_base64 = base64.b64encode(url.encode()).decode().rstrip("=")
+        # url_sha256 = hashlib.sha256(url.encode()).hexdigest()
         # Debug statements for VT API.
         # print(f"Base64: {url_base64}")
         # print(f"SHA256: {url_sha256}")
