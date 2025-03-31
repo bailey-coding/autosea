@@ -80,7 +80,9 @@ def tui():
             self.browser = None
             self.validate_ready()
             platform_data = OS_DICT.get(self.platform)
-            browser_options = [(browser, browser) for browser, agent in platform_data.items() if agent]
+            browser_options = [
+                (browser, browser) for browser, agent in platform_data.items() if agent
+            ]
 
             if self.browser_select.parent:
                 self.browser_select.remove()
@@ -119,6 +121,7 @@ def tui():
                 self.exit(1)
 
     sys.exit(UserAgentApp().run())
+
 
 if __name__ == "__main__":
     tui()
